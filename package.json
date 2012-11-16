@@ -1,0 +1,40 @@
+{
+  "name": "grunt-contrib-usemin",
+  "description": "Let you use html comments to define list of files amon tasks.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/seb/grunt-contrib-usemin",
+  "author": {
+    "name": "Sebastien Vincent",
+    "email": "seb.vincent@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/seb/grunt-contrib-usemin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/seb/grunt-contrib-usemin/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/seb/grunt-contrib-usemin/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "Gruntfile.js",
+  "bin": "bin/grunt-contrib-usemin",
+  "engines": {
+    "node": ">= 0.6.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "grunt": "~0.4.0a"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.0a"
+  },
+  "keywords": [
+    "gruntplugin"
+  ]
+}
