@@ -44,7 +44,7 @@ describe('usemin', function() {
       var content = "before block\n" + block + "\nafter block";
       var awaited = "before block\n   <link rel=\"stylesheet\" href=\"foo\"/>\nafter block";
       var changed = grunt.helper('usemin:css', content, block, 'foo');
-      assert.ok( changed == awaited );
+      assert.ok( changed === awaited );
     });
   });
 
@@ -61,7 +61,7 @@ describe('usemin', function() {
       var content = '<img src="//css/main.css">';
       var awaited = '<img src="//css/main.css">';
       var changed = grunt.helper('usemin:post:html', content);
-      assert.ok( changed == awaited );
+      assert.ok( changed === awaited );
 
     });
 
@@ -70,7 +70,7 @@ describe('usemin', function() {
       var content = '<link href="css/main.css" rel="stylesheet"/><link rel="stylesheet" href="css/main.css"/>';
       var awaited = '<link href="css/23012.main.css" rel="stylesheet"/><link rel="stylesheet" href="css/23012.main.css"/>';
       var changed = grunt.helper('usemin:post:html', content);
-      assert.ok( changed == awaited );
+      assert.ok( changed === awaited );
     });
 
     it('should treat files referenced from site root', function() {
@@ -78,7 +78,7 @@ describe('usemin', function() {
       var content = '<img src="/images/foo.png">';
       var awaited = '<img src="/images/23012.foo.png">';
       var changed = grunt.helper('usemin:post:html', content);
-      assert.ok( changed == awaited );
+      assert.ok( changed === awaited );
     });
 
     it('should also replace local reference in anchors', function() {
@@ -86,14 +86,14 @@ describe('usemin', function() {
       var content = '<a href="http://foo/bar"></a><a href="ftp://bar"></a><a href="images/foo.png"></a><a href="/images/foo.png"></a><a href="#local"></a>';
       var awaited = '<a href="http://foo/bar"></a><a href="ftp://bar"></a><a href="images/23012.foo.png"></a><a href="/images/23012.foo.png"></a><a href="#local"></a>';
       var changed = grunt.helper('usemin:post:html', content);
-      assert.ok( changed == awaited );
+      assert.ok( changed === awaited );
     });
 
     it('should handle properly the case of the root path (/)', function() {
-      var content = '<a href="/">'
+      var content = '<a href="/">';
       var awaited = '<a href="/">';
       var changed = grunt.helper('usemin:post:html', content);
-      assert.ok( changed == awaited );
+      assert.ok( changed === awaited );
     });
   });
   describe('usemin-handler', function() {
@@ -106,14 +106,24 @@ describe('usemin', function() {
       grunt.config.init();
       grunt.config('usemin-handler', {html: "index.html"});
       grunt.file.copy(path.join(__dirname,"fixtures/usemin.html"), "index.html");
+      
       grunt.task.run('usemin-handler:html');
+      
+      // Report, etc when all tasks have completed.
+      grunt.task.options({
+        error: function(e) {
+          assert(!e, e); 
+        },
+        done: function() {
+          // Grunt config related to concat should have been changed
+          var concat_config = grunt.config('concat');
+          // Actually the fixture index.html requires to concat stuff in '/scripts/plugins.js' ...
+          // As this references a local file, the concat config should have a key named
+          // 'scripts/plugins.js' (i.e. *without* the leading /)
+          assert.ok('scripts/plugins.js' in concat_config);
+        }
+      });
       grunt.task.start();
-      // Grunt config related to concat should have been changed
-      var concat_config = grunt.config('concat');
-      // Actually the fixture index.html requires to concat stuff in '/scripts/plugins.js' ...
-      // As this references a local file, the concat config should have a key named
-      // 'scripts/plugins.js' (i.e. *without* the leading /)
-      assert.ok('scripts/plugins.js' in concat_config);
-    })
+    });
   });
 });

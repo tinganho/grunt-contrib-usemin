@@ -32,7 +32,11 @@
     "grunt": "~0.4.0a"
   },
   "devDependencies": {
-    "grunt": "~0.4.0a"
+    "grunt": "~0.4.0a",
+    "path": "~0.4.9",
+    "mkdirp": "~0.3.4",
+    "rimraf": "~2.0.2",
+    "assert": "~0.4.9"
   },
   "keywords": [
     "gruntplugin"

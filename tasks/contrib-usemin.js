@@ -4,7 +4,8 @@
  */
 
 var fs = require('fs'),
-  path = require('path');
+  path = require('path'),
+  util = require('util');
 
 // start build pattern --> <!-- build:[target] output -->
 var regbuild = /<!--\s*build:(\w+)\s*(.+)\s*-->/;
@@ -79,6 +80,10 @@ function getBlocks(body) {
 // }
 
   return sections;
+}
+
+function inspect(obj) {
+  return util.inspect(obj, false, 4, true);
 }
 
 
@@ -203,14 +208,19 @@ module.exports = function(grunt) {
     // log a bit what was added to config
     grunt.log.subhead('Configuration is now:')
       .subhead('  css:')
-      .writeln('  ' + grunt.helper('inspect', css))
+      .writeln('  ' + inspect(grunt.config('css')))
       .subhead('  concat:')
-      .writeln('  ' + grunt.helper('inspect', concat))
+      .writeln('  ' + inspect(grunt.config('concat')))
       .subhead('  min:')
-      .writeln('  ' + grunt.helper('inspect', min))
+      .writeln('  ' + inspect(grunt.config('min')))
       .subhead('  rjs:')
-      .writeln('  ' + grunt.helper('inspect', rjs));
+      .writeln('  ' + inspect(grunt.config('rjs')));
+    throw "TOTALLY WRONG";
+  });
 
+   // Output some info on given object, using util.inspect, using colorized output.
+  grunt.registerHelper('inspect', function(o) {
+    return util.inspect(o, false, 4, true);
   });
 
   // Helpers
