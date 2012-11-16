@@ -30,6 +30,8 @@ describe('usemin', function() {
       // Let's avoid cluttering the output
       grunt.log.muted = true;
       var content = grunt.file.read(path.join(__dirname,"fixtures/usemin.html"));
+      
+      console.log("AKAK", grunt.helper);
       var changed = grunt.helper('replace',content, /<img[^\>]+src=['"]([^"']+)["']/gm);
 
       // Check replace has performed its duty
