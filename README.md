@@ -1,6 +1,8 @@
 # grunt-contrib-usemin
 
-Let you use html comments to define list of files amon tasks.
+This is a port from Yeoman.
+
+Let you use html comments to define list of files and run tasks.
 
 ## Getting Started
 Install this grunt plugin next to your project's [Gruntfile][getting_started] with: `npm install grunt-contrib-usemin`
