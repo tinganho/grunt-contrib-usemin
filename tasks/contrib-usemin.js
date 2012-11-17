@@ -90,10 +90,14 @@ function inspect(obj) {
 module.exports = function(grunt) {
 
   grunt.registerMultiTask('usemin', 'Replaces references to non-minified scripts / stylesheets', function() {
+    
+    var baseDir = this.options().baseDir;
 
-    var name = this.target,
-      data = this.data,
-      files = grunt.file.expand(data);
+    var name = this.target;
+    if ((typeof this.data) === 'string') {this.data = [this.data];}
+    var files = grunt.file.expand(this.data.map(function(f) { 
+        return path.join(baseDir, f);
+      }));
 
     files.map(grunt.file.read).forEach(function(content, i) {
       var p = files[i];
@@ -122,13 +126,16 @@ module.exports = function(grunt) {
   });
 
   grunt.registerMultiTask('usemin-handler', 'Using HTML markup as the primary source of information', function() {
+    var baseDir = this.options().baseDir;
     // collect files
-    var files = grunt.file.expandFiles(this.data);
-
+    if ((typeof this.data) === 'string') {this.data = [this.data];}
+    var files = grunt.file.expandFiles(this.data.map(function(f) {
+      return path.join(baseDir, f);
+    }));
     // concat / min / css / rjs config
     var concat = grunt.config('concat') || {},
       min = grunt.config('min') || {},
-      css = grunt.config('css') || {},
+      mincss = grunt.config('mincss') || {},
       rjs = grunt.config('rjs') || {};
 
     grunt.log
@@ -153,6 +160,7 @@ module.exports = function(grunt) {
         if (output[0] === '/') {
           output = output.substr(1);
         }
+        output = path.join(baseDir , output);
 
         // parse out the list of assets to handle, and update the grunt config accordingly
         var assets = lines.map(function(tag) {
@@ -193,29 +201,28 @@ module.exports = function(grunt) {
 
         // min config, only for js type block
         if(type === 'js') {
-          min[output] = output;
+          min[output.replace(".js",".min.js")] = output;
           grunt.config('min', min);
         }
 
-        // css config, only for css type block
+        // mincss config, only for mincss type block
         if(type === 'css') {
-          css[output] = output;
-          grunt.config('css', css);
+          mincss[output.replace('.css','.min.css')] = output;
+          grunt.config('mincss', mincss);
         }
       });
     });
 
     // log a bit what was added to config
     grunt.log.subhead('Configuration is now:')
-      .subhead('  css:')
-      .writeln('  ' + inspect(grunt.config('css')))
       .subhead('  concat:')
       .writeln('  ' + inspect(grunt.config('concat')))
+      .subhead('  mincss:')
+      .writeln('  ' + inspect(grunt.config('mincss')))
       .subhead('  min:')
       .writeln('  ' + inspect(grunt.config('min')))
       .subhead('  rjs:')
       .writeln('  ' + inspect(grunt.config('rjs')));
-    throw "TOTALLY WRONG";
   });
 
    // Output some info on given object, using util.inspect, using colorized output.
@@ -310,6 +317,7 @@ module.exports = function(grunt) {
   // the list of files on the filesystem to guess the actual revision of a file
   //
   grunt.registerHelper('replace', function(content, regexp) {
+    var baseDir = grunt.task.current.options().baseDir;
     return content.replace(regexp, function(match, src) {
       //do not touch external files or the root
       if ( src.match(/\/\//) || src.match(/^\/$/)) {
@@ -321,14 +329,18 @@ module.exports = function(grunt) {
         src = src.substr(1);
       }
 
-      var basename = path.basename(src);
       var dirname = path.dirname(src);
+      var extname = path.extname(src);
+      var basename = path.basename(src, extname);
+      //'*'.path.
+      var revSrc = path.join( baseDir, dirname , '*.' + basename + extname );
+      var revMinSrc = path.join( baseDir , dirname , '*.' + basename + ".min" + extname ); 
 
       // XXX files won't change, the filepath should filter the original list
       // of cached files (we need to treat the filename collision -- i.e. 2 files with same names
       // in different subdirectories)
-      var filepaths = grunt.file.expand(path.join('**/*') + basename);
-      var filepath = filepaths.filter(function(f) { return dirname === path.dirname(f);})[0];
+      var filepaths = grunt.file.expand([revSrc,revMinSrc]);
+      var filepath = filepaths[0];
 
       // not a file in temp, skip it
       if ( !filepath ) {
@@ -337,7 +349,6 @@ module.exports = function(grunt) {
       var filename = path.basename(filepath);
       // handle the relative prefix (with always unix like path even on win32)
       filename = [dirname, filename].join('/');
-
       // if file not exists probaly was concatenated into another file so skip it
       if ( !filename ) {
         return '';
