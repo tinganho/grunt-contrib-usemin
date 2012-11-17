@@ -349,7 +349,6 @@ module.exports = function(grunt) {
         .ok(src)
         .writeln('was ' + match)
         .writeln('now ' + res);
-
       return res;
     });
   });
