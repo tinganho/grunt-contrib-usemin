@@ -3,15 +3,16 @@ var fs      = require('fs');
 var path    = require('path');
 var grunt   = require('grunt');
 var assert  = require('assert');
-var helpers = require('./helpers');
+var testHelpers = require('./helpers');
 var usemin = require('../tasks/contrib-usemin.js');
+var useminHelpers = require('../lib/usemin-helpers')(grunt);
 
 var opts = grunt.cli.options;
 opts.redirect = !opts.silent;
 
 // XXX Conform to coding guidelines, mostly literral spacing stuff
 describe('usemin', function() {
-  before(helpers.directory('.test'));
+  before(testHelpers.directory('.test'));
   describe('replace helper', function() {
     it("should take into account path", function() {
       usemin.call(grunt,grunt);
@@ -30,7 +31,7 @@ describe('usemin', function() {
       // Let's avoid cluttering the output
       grunt.log.muted = true;
       var content = grunt.file.read(path.join(__dirname,"fixtures/usemin.html"));
-      var changed = grunt.helper('replace',content, /<img[^\>]+src=['"]([^"']+)["']/gm);
+      var changed = useminHelpers.replace('.', content, /<img[^\>]+src=['"]([^"']+)["']/gm);
 
       // Check replace has performed its duty
       assert.ok( changed.match(/img[^\>]+src=['"]images\/23012\.test\.png["']/) );
@@ -43,7 +44,7 @@ describe('usemin', function() {
       var block = "   foo\nbar\nbaz";
       var content = "before block\n" + block + "\nafter block";
       var awaited = "before block\n   <link rel=\"stylesheet\" href=\"foo\"/>\nafter block";
-      var changed = grunt.helper('usemin:css', content, block, 'foo');
+      var changed = useminHelpers['usemin:css']('.', content, block, 'foo');
       assert.ok( changed === awaited );
     });
   });
@@ -60,7 +61,7 @@ describe('usemin', function() {
       grunt.file.write('images/23012.foo.png', "foo");
       var content = '<img src="//css/main.css">';
       var awaited = '<img src="//css/main.css">';
-      var changed = grunt.helper('usemin:post:html', content);
+      var changed = useminHelpers['usemin:post:html']('.', content);
       assert.ok( changed === awaited );
 
     });
@@ -69,7 +70,7 @@ describe('usemin', function() {
       grunt.file.write('css/23012.main.css', "foo");
       var content = '<link href="css/main.css" rel="stylesheet"/><link rel="stylesheet" href="css/main.css"/>';
       var awaited = '<link href="css/23012.main.css" rel="stylesheet"/><link rel="stylesheet" href="css/23012.main.css"/>';
-      var changed = grunt.helper('usemin:post:html', content);
+      var changed = useminHelpers['usemin:post:html']('.', content);
       assert.ok( changed === awaited );
     });
 
@@ -77,7 +78,7 @@ describe('usemin', function() {
       grunt.file.write('images/23012.foo.png', "foo");
       var content = '<img src="/images/foo.png">';
       var awaited = '<img src="/images/23012.foo.png">';
-      var changed = grunt.helper('usemin:post:html', content);
+      var changed = useminHelpers['usemin:post:html']('.', content);
       assert.ok( changed === awaited );
     });
 
@@ -85,14 +86,14 @@ describe('usemin', function() {
       grunt.file.write('images/23012.foo.png', "foo");
       var content = '<a href="http://foo/bar"></a><a href="ftp://bar"></a><a href="images/foo.png"></a><a href="/images/foo.png"></a><a href="#local"></a>';
       var awaited = '<a href="http://foo/bar"></a><a href="ftp://bar"></a><a href="images/23012.foo.png"></a><a href="/images/23012.foo.png"></a><a href="#local"></a>';
-      var changed = grunt.helper('usemin:post:html', content);
+      var changed = useminHelpers['usemin:post:html']('.', content);
       assert.ok( changed === awaited );
     });
 
     it('should handle properly the case of the root path (/)', function() {
       var content = '<a href="/">';
       var awaited = '<a href="/">';
-      var changed = grunt.helper('usemin:post:html', content);
+      var changed = useminHelpers['usemin:post:html']('.', content);
       assert.ok( changed === awaited );
     });
   });
@@ -100,7 +101,7 @@ describe('usemin', function() {
     it("should treat local references", function() {
       grunt.log.muted = true;
       usemin.call(grunt, grunt);
-      helpers.gruntfile({'usemin-handler': {
+      testHelpers.gruntfile({'usemin-handler': {
         html: 'index.html'}
       });
       grunt.config.init();
