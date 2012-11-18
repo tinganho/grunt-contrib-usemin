@@ -1,6 +1,6 @@
 # grunt-contrib-usemin
 
-This is a port from Yeoman.
+A port of Yeoman usemin task for Grunt 0.4.
 
 Let you use html comments to define list of files and run tasks.
 
